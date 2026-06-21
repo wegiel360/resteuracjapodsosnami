@@ -14,13 +14,13 @@
 <link rel="preload" as="audio" href="/static/Gotowe.mp3">
 <link rel="preload" as="audio" href="/static/anulowano.mp3">
 <style>
-  body { background:linear-gradient(135deg,#2a1a16 0%,#2a1a16 50%,#2a1a16 100%); font-family:system-ui,-apple-system,sans-serif; color:#8e4632; font-size:14px; overflow:hidden; height:100vh }
+  body { background:linear-gradient(135deg,#2a1a16 0%,#2a1a16 50%,#2a1a16 100%); font-family:system-ui,-apple-system,sans-serif; color:#fff; font-size:14px; overflow:hidden; height:100vh }
   .container { position:relative; z-index:1; padding:20px; height:100vh; display:flex; flex-direction:column }
   .orders { display:flex; flex-direction:column; gap:6px; flex:1; overflow-y:auto }
   .order { background:rgba(142,70,50,0.03); border:1px solid rgba(142,70,50,0.06); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.15s }
   .order:hover { background:rgba(142,70,50,0.06); border-color:rgba(142,70,50,0.1) }
-  .order-items { font-size:0.9rem; color:#8e4632; display:flex; gap:6px; flex-wrap:wrap }
-  .order-extras { font-size:0.75rem; color:#8e4632; margin-top:2px }
+  .order-items { font-size:0.9rem; color:#fff; display:flex; gap:6px; flex-wrap:wrap }
+  .order-extras { font-size:0.75rem; color:#fff; margin-top:2px }
   .order-time { font-size:0.7rem; margin-top:2px }
   .order-time.fresh { color:#4ade80 }
   .order-time.warn { color:#fbbf24 }
@@ -29,11 +29,11 @@
   .order-item-text { white-space:nowrap }
   .order-status { font-size:0.75rem; letter-spacing:0.05em; padding:2px 8px; border-radius:4px; border:1px solid currentColor; text-transform:uppercase; font-weight:500; white-space:nowrap }
   .order-status.progress { color:#fbbf24 }
-  .order-status.ordered { color:#8e4632 }
+  .order-status.ordered { color:#fff }
   .order-status.done { color:#4ade80 }
   .order-status.cancelled { color:#f87171 }
   .order-status.returned { color:#a78bfa }
-  .empty { color:#8e4632; font-size:0.9rem; text-align:center; padding:40px }
+  .empty { color:#fff; font-size:0.9rem; text-align:center; padding:40px }
   
   /* Optymalizacja renderowania warstw animacji przez GPU */
   .bounce-logo { position:fixed; z-index:0; width:360px; height:198px; pointer-events:none; background:url(/static/BarWegielstwo.png) center/contain no-repeat; opacity:0.7; transform: translate3d(0,0,0); will-change:transform }
@@ -41,24 +41,24 @@
 
   .splash { position:fixed; top:0; left:0; width:100%; height:100%; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; transition:opacity .6s }
   .splash.hidden { opacity:0 }
-  .splash h1 { font-size:3rem; color:#8e4632; text-shadow:0 0 30px rgba(142,70,50,0.2); letter-spacing:4px; margin-bottom:12px }
-  .splash p { font-size:1rem; color:#8e4632; margin-bottom:24px }
+  .splash h1 { font-size:3rem; color:#fff; text-shadow:0 0 30px rgba(142,70,50,0.2); letter-spacing:4px; margin-bottom:12px }
+  .splash p { font-size:1rem; color:#fff; margin-bottom:24px }
   .splash .qr { background:#fff; padding:10px; border-radius:10px; display:inline-block }
   .splash .qr canvas, .splash .qr img { display:block; width:150px; height:150px }
   
   .hud { position:fixed; top:12px; right:16px; z-index:10; font-size:0.75rem; color:#fff; text-align:right; pointer-events:none; transition:opacity .3s }
   .hud.hidden { opacity:0 }
   .info-bar { position:fixed; top:12px; left:16px; z-index:10; font-size:0.75rem; pointer-events:none; display:flex; gap:16px; align-items:center }
-  .info-bar .clock { color:#8e4632; font-weight:600; font-size:0.85rem }
+  .info-bar .clock { color:#fff; font-weight:600; font-size:0.85rem }
   .info-bar .danie-dnia { color:#fbbf24 }
   
   .help-overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:100; background:rgba(42,26,22,0.88); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s }
   .help-overlay.on { opacity:1; pointer-events:auto }
   .help-overlay table { border-collapse:collapse; font-size:0.85rem }
-  .help-overlay td { padding:6px 18px; border-bottom:1px solid rgba(142,70,50,0.06); color:#8e4632 }
-  .help-overlay td:first-child { color:#8e4632; font-weight:600; text-align:right }
-  .help-overlay td:last-child { color:#8e4632 }
-  .help-overlay .title { font-size:1.1rem; color:#8e4632; margin-bottom:20px; letter-spacing:2px }
+  .help-overlay td { padding:6px 18px; border-bottom:1px solid rgba(142,70,50,0.06); color:#fff }
+  .help-overlay td:first-child { color:#fff; font-weight:600; text-align:right }
+  .help-overlay td:last-child { color:#fff }
+  .help-overlay .title { font-size:1.1rem; color:#fff; margin-bottom:20px; letter-spacing:2px }
 </style>
 </head>
 <body>
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // updateClock();
 
 // function updateHud() {
-//   document.getElementById('hud').innerHTML = els.map(e => (e.label || e.el.className.split(' ')[0].replace('bounce-','')) + ': ' + e.hits + ' uderze' + (e.hits===1?'ń':'nia')).join('<br>') + '<br><span style="color:#8e4632">razem: ' + els.reduce((s,e)=>s+e.hits,0) + '</span>';
+//   document.getElementById('hud').innerHTML = els.map(e => (e.label || e.el.className.split(' ')[0].replace('bounce-','')) + ': ' + e.hits + ' uderze' + (e.hits===1?'ń':'nia')).join('<br>') + '<br><span style="color:#fff">razem: ' + els.reduce((s,e)=>s+e.hits,0) + '</span>';
 // }
 
 const cols = ['#fbbf24','#4ade80','#60a5fa','#a78bfa','#f87171','#8e4632','#f472b6'];
