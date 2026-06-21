@@ -1,4 +1,4 @@
-# Restauracja pod Sosnami
+# Bar Węgielstwo
 
 System zamówień i zarządzania dla restauracji. Trzy panele: zamawianie (kiosk), tablica (podgląd na żywo z efektownymi logami DVD), zarządzanie (admin). Hostowane (może być nieaktualne) na wegiel.pythonanywhere.com
 

@@ -77,13 +77,13 @@ def load_database():
             "menu_items": [],
             "portions": ["1 porcja", "2 porcje", "Pól porcji"],
             "extras": ["Sól", "Pieprz", "Ketchup"],
-            "custom_message": "Witaj w Restauracji pod Sosnami!",
+            "custom_message": "Witaj w Barze Węgielstwo!",
             "danie_dnia": ""
         }
         _db_mtime = 0
 
     # Szybka normalizacja brakujących pól robiona TYLKO przy odczycie z dysku
-    if 'custom_message' not in data: data['custom_message'] = "Witaj w Restauracji pod Sosnami!"
+    if 'custom_message' not in data: data['custom_message'] = "Witaj w Barze Węgielstwo!"
     if 'portions' not in data: data['portions'] = []
     if 'extras' not in data: data['extras'] = []
     if 'receipt_counter' not in data: data['receipt_counter'] = 0
@@ -137,7 +137,7 @@ def zapisz_paragon(order):
     filepath = PARAGON_DIR / filename
     
     receipt_content = []
-    receipt_content.append("Resteuracja pod Sosnami")
+    receipt_content.append("Bar Węgielstwo")
     receipt_content.append("------------------------------------")
     receipt_content.append(f"Data: {datetime.fromisoformat(order['timestamp']).strftime('%d.%m.%Y %H:%M:%S')}")
     receipt_content.append(f"Numer: {numer}")
