@@ -8,30 +8,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
 <script src="/script.js"></script>
 <style>
-  body { font-size:14px; font-family:system-ui,-apple-system,sans-serif,'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif; color:#b0c8d0 }
-  .header { display:flex; align-items:center; gap:16px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(0,200,220,0.15) }
-  .logo { height:28px; opacity:0.7; filter:drop-shadow(0 0 4px rgba(0,200,220,0.3)) }
-  h1 { font-size:1.1rem; font-weight:600; color:#7ecfd4; text-shadow:0 0 12px rgba(0,200,220,0.15) }
-  .tab-bar { display:flex; gap:4px; margin-bottom:24px; border-bottom:1px solid rgba(0,200,220,0.1); padding-bottom:0 }
-  .tab-btn { padding:8px 16px; border:none; background:none; color:#5a8a94; font:inherit; font-size:0.85rem; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:0.15s; border-radius:6px 6px 0 0 }
-  .tab-btn:hover { color:#8cd4de; background:rgba(0,200,220,0.04) }
-  .tab-btn.active { color:#70d4e0; border-bottom-color:#00d4e0; text-shadow:0 0 8px rgba(0,212,224,0.2) }
+  body { font-size:14px; font-family:system-ui,-apple-system,sans-serif,'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif; color:#302621 }
+  .header { display:flex; align-items:center; gap:16px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(48,38,33,0.15) }
+  .logo { height:28px; opacity:0.7; filter:drop-shadow(0 0 4px rgba(48,38,33,0.3)) }
+  h1 { font-size:1.1rem; font-weight:600; color:#302621; text-shadow:0 0 12px rgba(48,38,33,0.15) }
+  .tab-bar { display:flex; gap:4px; margin-bottom:24px; border-bottom:1px solid rgba(48,38,33,0.1); padding-bottom:0 }
+  .tab-btn { padding:8px 16px; border:none; background:none; color:#302621; font:inherit; font-size:0.85rem; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:0.15s; border-radius:6px 6px 0 0 }
+    .tab-btn:hover { color:#302621; background:rgba(48,38,33,0.04) }
+  .tab-btn.active { color:#302621; border-bottom-color:#302621; text-shadow:0 0 8px rgba(48,38,33,0.2) }
   .section { display:none; padding:0 }
   .section.active { display:block }
-  .section-title { font-size:1.1rem; font-weight:600; color:#7ecfd4; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid rgba(180,200,220,0.08); text-shadow:0 0 8px rgba(0,200,220,0.1) }
+  .section-title { font-size:1.1rem; font-weight:600; color:#302621; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid rgba(48,38,33,0.08); text-shadow:0 0 8px rgba(48,38,33,0.1) }
   
   /* Czysty układ 3 kolumn bez bocznego panelu */
   .form-grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
-  .form-tile { background: linear-gradient(145deg, rgba(40,55,65,0.1), rgba(20,30,40,0.15)); border: 1px solid rgba(0,200,220,0.08); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; min-height: 120px; box-sizing: border-box; }
-  .form-tile input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(180,200,220,0.2); color: #b0c8d0; font-size: 1rem; padding: 8px 0; outline: none; transition: border-color 0.2s; }
-  .form-tile input:focus { border-bottom-color: #00d4e0; }
+  .form-tile { background: linear-gradient(145deg, rgba(16,22,27,0.1), rgba(16,22,27,0.15)); border: 1px solid rgba(48,38,33,0.08); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; min-height: 120px; box-sizing: border-box; }
+  .form-tile input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(48,38,33,0.2); color: #302621; font-size: 1rem; padding: 8px 0; outline: none; transition: border-color 0.2s; }
+  .form-tile input:focus { border-bottom-color: #302621; }
 
   .list-container { display:flex; flex-direction:column; gap:2px; margin-bottom:12px; max-width:100%; overflow-x:auto }
   .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,8,12,0.85); z-index:2000; justify-content:center; align-items:center }
-  .modal-content { background:linear-gradient(145deg, rgba(70,90,100,0.15), rgba(30,40,50,0.2)); padding:24px; max-width:600px; width:90%; max-height:90vh; overflow-y:auto; border:1px solid rgba(180,200,220,0.08); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) }
-  .menu-list-wrapper { background:linear-gradient(145deg,rgba(100,120,130,0.06),rgba(40,50,60,0.1)); border:1px solid rgba(180,200,220,0.08); border-radius:12px; overflow:hidden; }
-  .menu-list-header { display:grid; padding:12px 16px; background:linear-gradient(145deg,rgba(100,120,130,0.1),rgba(40,50,60,0.15)); border-bottom:1px solid rgba(180,200,220,0.08); color:#7ecfd4; font-size:0.85rem; font-weight:600; }
-  h3 { font-size:0.95rem; color:#6a9aa8; margin-bottom:12px; font-weight:500 }
+  .modal-content { background:linear-gradient(145deg, rgba(16,22,27,0.15), rgba(16,22,27,0.2)); padding:24px; max-width:600px; width:90%; max-height:90vh; overflow-y:auto; border:1px solid rgba(48,38,33,0.08); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) }
+  .menu-list-wrapper { background:linear-gradient(145deg,rgba(16,22,27,0.06),rgba(16,22,27,0.1)); border:1px solid rgba(48,38,33,0.08); border-radius:12px; overflow:hidden; }
+  .menu-list-header { display:grid; padding:12px 16px; background:linear-gradient(145deg,rgba(16,22,27,0.1),rgba(16,22,27,0.15)); border-bottom:1px solid rgba(48,38,33,0.08); color:#302621; font-size:0.85rem; font-weight:600; }
+  h3 { font-size:0.95rem; color:#302621; margin-bottom:12px; font-weight:500 }
   .container { max-width:1400px; padding:32px; margin:0 auto }
   
   @media (max-width:768px) {
@@ -45,7 +45,7 @@
   <div class="header">
     <img src="/static/BarWegielstwo.png" alt="Logo" class="logo">
     <h1>Zarządzanie</h1>
-    <span style="margin-left:auto;font-size:0.75rem;color:#444" id="clock"></span>
+    <span style="margin-left:auto;font-size:0.75rem;color:#302621" id="clock"></span>
   </div>
 
   <div class="tab-bar">
@@ -66,7 +66,7 @@
     <div style="display:flex;gap:8px;margin-top:15px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-gold" onclick="ringDzwonek()">Dzwonek</button>
       <button class="btn btn-red" onclick="clearAllOrders()">Usuń wszystkie zamówienia</button>
-      <span style="font-size:0.7rem;color:#444" id="cleanup-info"></span>
+      <span style="font-size:0.7rem;color:#302621" id="cleanup-info"></span>
     </div>
   </div>
 
@@ -104,7 +104,7 @@
 
     <h3 class="section-title">Dodatki gratis</h3>
     <div class="form-group" style="margin-bottom:16px;">
-      <input type="text" id="new-extra-name" placeholder="Nazwa dodatku (np. Sól, Pieprz)" style="width:100%; max-width:400px; padding:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(180,200,220,0.1); color:#b0c8d0; border-radius:6px; margin-bottom:10px;">
+      <input type="text" id="new-extra-name" placeholder="Nazwa dodatku (np. Sól, Pieprz)" style="width:100%; max-width:400px; padding:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(48,38,33,0.1); color:#302621; border-radius:6px; margin-bottom:10px;">
       <br>
       <button class="btn btn-green" onclick="addExtra()">Dodaj dodatek gratis</button>
     </div>
@@ -215,8 +215,8 @@
             document.getElementById('extras-list').innerHTML = extras.map(e => {
                 const x = typeof e === 'string' ? { name: e, emoji: '', available: true } : e;
                 return `
-                    <div class="list-item" style="display:grid;grid-template-columns:2fr 1fr 80px;padding:10px 16px;border-bottom:1px solid rgba(180,200,220,0.06);align-items:center;">
-                        <span style="color:#8cc8d0;font-size:0.85rem;">${x.emoji || ''} ${x.name}</span>
+                    <div class="list-item" style="display:grid;grid-template-columns:2fr 1fr 80px;padding:10px 16px;border-bottom:1px solid rgba(48,38,33,0.06);align-items:center;">
+                        <span style="color:#302621;font-size:0.85rem;">${x.emoji || ''} ${x.name}</span>
                         <span style="color:${x.available ? '#4ade80' : '#f87171'};font-size:0.8rem;text-align:center;">${x.available ? 'Dostępne' : 'Niedostępne'}</span>
                         <div style="display:flex;gap:4px;justify-content:center;">
                             <button class="btn btn-sm" onclick="toggleExtraAvailability('${x.name}', ${!x.available})">Zmień</button>
@@ -271,7 +271,7 @@
 
     function renderOrders() {
         const grid = document.getElementById('orders-grid');
-        if (orders.length === 0) return grid.innerHTML = '<div class="list-empty" style="padding:16px; text-align:center; color:#5a8a94;">Brak zamówień</div>';
+        if (orders.length === 0) return grid.innerHTML = '<div class="list-empty" style="padding:16px; text-align:center; color:#302621;">Brak zamówień</div>';
 
         const grouped = {};
         orders.forEach(o => {
@@ -281,10 +281,10 @@
 
         grid.innerHTML = Object.values(grouped).map(g => {
             const items = g.items.map(o => (o.items || [o]).map(i => `${i.emoji || ''} ${i.item_name || i.name || '?'}`).join(', ')).join(', ');
-            const color = g.status === 'Gotowe' ? '#4ade80' : g.status === 'Anulowane' ? '#f87171' : g.status === 'W realizacji' ? '#fbbf24' : '#40d0b0';
+            const color = g.status === 'Gotowe' ? '#4ade80' : g.status === 'Anulowane' ? '#f87171' : g.status === 'W realizacji' ? '#fbbf24' : '#302621';
             return `
-                <div class="list-item" style="display:grid;grid-template-columns:1fr 120px 160px;padding:10px 16px;border-bottom:1px solid rgba(180,200,220,0.06);align-items:center;">
-                    <span style="color:#8cc8d0;font-size:0.85rem;">${items}</span>
+                <div class="list-item" style="display:grid;grid-template-columns:1fr 120px 160px;padding:10px 16px;border-bottom:1px solid rgba(48,38,33,0.06);align-items:center;">
+                    <span style="color:#302621;font-size:0.85rem;">${items}</span>
                     <span style="color:${color};font-size:0.8rem;text-align:center;">${g.status}</span>
                     <div style="display:flex;gap:4px;justify-content:center;">
                         <button class="btn btn-sm" onclick="cycleOrderStatus('${g.orderId}')">Zmień</button>
@@ -297,12 +297,12 @@
 
     function renderMenuList() {
         const list = document.getElementById('menu-list');
-        if (menuItems.length === 0) return list.innerHTML = '<div class="list-empty" style="padding:16px; text-align:center; color:#5a8a94;">Brak pozycji w menu</div>';
+        if (menuItems.length === 0) return list.innerHTML = '<div class="list-empty" style="padding:16px; text-align:center; color:#302621;">Brak pozycji w menu</div>';
 
         list.innerHTML = menuItems.map(item => `
-            <div class="list-item" style="display:grid;grid-template-columns:2fr 1fr 1fr 80px;padding:10px 16px;border-bottom:1px solid rgba(180,200,220,0.06);align-items:center;">
-                <span style="color:#8cc8d0;font-size:0.85rem;">${item.emoji} ${item.name}</span>
-                <span style="color:#5a8a94;font-size:0.78rem;text-align:center;">${item.category || 'Inne'}</span>
+            <div class="list-item" style="display:grid;grid-template-columns:2fr 1fr 1fr 80px;padding:10px 16px;border-bottom:1px solid rgba(48,38,33,0.06);align-items:center;">
+                <span style="color:#302621;font-size:0.85rem;">${item.emoji} ${item.name}</span>
+                <span style="color:#302621;font-size:0.78rem;text-align:center;">${item.category || 'Inne'}</span>
                 <span style="color:${item.available ? '#4ade80' : '#f87171'};font-size:0.8rem;text-align:center;">${item.available ? 'Dostępne' : 'Niedostępne'}</span>
                 <div style="display:flex;gap:4px;justify-content:center;">
                     <button class="btn btn-sm" onclick="toggleMenuItemAvailability('${item.name}', ${!item.available})">Zmień</button>
@@ -336,7 +336,7 @@
   <div class="modal-content" style="max-width:400px;">
     <h3 style="margin-bottom:12px;color:#f87171">Anuluj zamówienie</h3>
     <input type="hidden" id="cancel-order-id">
-    <textarea id="cancel-reason" placeholder="Podaj powód anulowania..." style="width:100%;min-height:80px;padding:10px;border:1px solid rgba(180,200,220,0.08);background:rgba(0,0,0,0.3);color:#b0d4e0;font:inherit;font-size:0.85rem;border-radius:8px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
+    <textarea id="cancel-reason" placeholder="Podaj powód anulowania..." style="width:100%;min-height:80px;padding:10px;border:1px solid rgba(48,38,33,0.08);background:rgba(0,0,0,0.3);color:#b0d4e0;font:inherit;font-size:0.85rem;border-radius:8px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
       <button class="btn" onclick="document.getElementById('cancel-modal').style.display='none'">Wróć</button>
       <button class="btn btn-red" onclick="submitCancel()">Anuluj zamówienie</button>
