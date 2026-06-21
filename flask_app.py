@@ -23,33 +23,6 @@ def serve_static(filename):
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE_FILE = BASE_DIR / 'bazadanych.json'
 
-MENU_EN = {
-    'Pierogi Ruskie': 'Russian Dumplings', 'Schabowy': 'Breaded Pork Chop',
-    'Rosół': 'Chicken Soup', 'Placki Ziemniaczane': 'Potato Pancakes',
-    'Bigos': "Hunter's Stew", 'Kotlet Mielony': 'Minced Pork Cutlet',
-    'Kompot': 'Compote', 'Szarlotka': 'Apple Pie', 'Tortilla': 'Tortilla',
-    'Zimna Woda': 'Cold Water', 'Frytki': 'Fries', 'Mleko': 'Milk',
-    'Panini': 'Panini', 'Jajko Smażone': 'Fried Egg', 'Woda': 'Water'
-}
-CAT_EN = {
-    'Dania Główne': 'Main Courses', 'Zupy': 'Soups', 'Napoje': 'Drinks',
-    'Desery': 'Desserts', 'Przystawki': 'Starters', 'Inne': 'Other',
-}
-EXTRA_EN = {
-    'Ketchup': 'Ketchup', 'Musztarda': 'Mustard', 'Majonez': 'Mayonnaise',
-    'Sos czosnkowy': 'Garlic sauce', 'Sos': 'Sauce', 'Keczap': 'Ketchup',
-    'Szczypiorek': 'Chives', 'Cebula': 'Onion', 'Ogórek': 'Cucumber',
-    'Sałatka': 'Salad', 'Papryka': 'Pepper', 'Pieprz': 'Pepper',
-    'Sól': 'Salt', 'Czosnek': 'Garlic', 'Cytryna': 'Lemon', 'Cukier': 'Sugar',
-    'Śmietana': 'Sour cream', 'Brak': 'None', 'Parówka': 'Sausage',
-    '2 parówki': '2 sausages', 'ser cheddar': 'cheddar cheese', 'Mascarpone': 'Mascarpone'
-}
-
-PORTIONS_EN = {
-    '1 porcja': '1 portion', '2 porcje': '2 portions', '3 porcje': '3 portions', 
-    'Duża porcja': 'Large portion', 'Mała porcja': 'Small portion', 'Pól porcji': 'Half portion'
-}
-
 def generate_order_number():
     return str(random.randint(101, 999))
 
@@ -174,10 +147,6 @@ def tablica():
 def zamow():
     return render_template('zamow.html')
 
-@app.route('/zamow/en')
-def zamow_en():
-    return render_template('zamow.html', lang='en')
-
 @app.route('/manage')
 def manage():
     return render_template('manage.html')
@@ -265,11 +234,6 @@ def api_menu():
         return jsonify({'success': True, 'item': item}), 201
         
     items = get_db().get('menu_items', [])
-    if request.args.get('lang') == 'en':
-        return jsonify([
-            {**i, 'name': MENU_EN.get(i['name'], i['name']), 'category': CAT_EN.get(i.get('category', ''), i.get('category', ''))} 
-            for i in items
-        ])
     return jsonify(items)
 
 @app.route('/api/menu/<name>', methods=['PUT', 'DELETE'])
@@ -300,8 +264,6 @@ def api_menu_item(name):
 @app.route('/api/portions')
 def api_portions():
     portions = get_db().get('portions', [])
-    if request.args.get('lang') == 'en':
-        portions = [PORTIONS_EN.get(p, p) for p in portions]
     return jsonify({'portions': portions})
 
 @app.route('/api/extras', methods=['GET', 'POST'])
@@ -328,8 +290,6 @@ def api_extras():
         
     raw = get_db().get('extras', [])
     extras = [e if isinstance(e, dict) else {'name': e, 'emoji': '', 'available': True} for e in raw]
-    if request.args.get('lang') == 'en':
-        extras = [{**e, 'name': EXTRA_EN.get(e['name'], e['name'])} for e in extras]
     return jsonify({'extras': extras})
 
 @app.route('/api/extras/<name>', methods=['PUT', 'DELETE'])

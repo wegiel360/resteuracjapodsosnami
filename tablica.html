@@ -69,11 +69,6 @@
       <p style="margin-bottom:16px">Zeskanuj kod, aby zamówić</p>
       <div class="qr" id="qr-pl"></div>
     </div>
-    <div style="text-align:center">
-      <h1 style="font-size:2.5rem;margin-bottom:4px;color:#7ecfd4">Order something!</h1>
-      <p style="margin-bottom:16px">Scan the code to order</p>
-      <div class="qr" id="qr-en"></div>
-    </div>
   </div>
 </div>
 <div class="bounce-gif" id="bounce-gif"></div>
@@ -239,15 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     correctLevel : QRCode.CorrectLevel.M
   });
 
-  new QRCode(document.getElementById("qr-en"), {
-    text: window.location.origin + '/zamow/en',
-    width: 150,
-    height: 150,
-    correctLevel : QRCode.CorrectLevel.M
-  });
-
-  // updateHud();
-  // fetch('/api/danie-dnia').then(r=>r.json()).then(d=>{ if(d.danie) document.getElementById('danie-dnia').textContent = 'Danie dnia: ' + d.danie }).catch(()=>{});
+  document.getElementById('danie-dnia').textContent = '';
 });
 
 // function updateClock() {

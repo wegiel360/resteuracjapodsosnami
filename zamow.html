@@ -128,36 +128,35 @@
 </div>
 
 <script>
-  const LANG = window.location.pathname.endsWith('/en') ? 'en' : 'pl';
   const T = {
-    title:        { pl:'Zamów - Bar Węgielstwo', en:'Order - Bar Węgielstwo' },
-    orderTitle:   { pl:'Zamów', en:'Order' },
-    orderSubtitle:{ pl:'Wybierz potrawy i porcje', en:'Choose dishes and portions' },
-    choosePortion:{ pl:'Wybierz porcję', en:'Choose portion' },
-    freeExtras:   { pl:'Dodatki gratis', en:'Free extras' },
-    skip:         { pl:'Pomiń', en:'Skip' },
-    addToCart:    { pl:'Dodaj do koszyka', en:'Add to cart' },
-    noMenu:       { pl:'Brak menu', en:'No menu' },
-    cart:         { pl:'Koszyk', en:'Cart' },
-    clear:        { pl:'Wyczyść', en:'Clear' },
-    order:        { pl:'Zamów', en:'Order' },
-    orderPlaced:  { pl:'✔ Zamówienie złożone!', en:'✔ Order placed!' },
-    emptyCart:    { pl:'Koszyk jest pusty', en:'Cart is empty' },
-    noItems:      { pl:'Brak pozycji w tej kategorii', en:'No items in this category' },
-    menuError:    { pl:'Błąd wczytywania menu', en:'Error loading menu' },
-    orderError:   { pl:'Błąd składania zamówienia', en:'Error placing order' },
-    error:        { pl:'Błąd:', en:'Error:' },
-    unknownError: { pl:'Nieznany błąd', en:'Unknown error' },
-    portion:      { pl:'Porcja:', en:'Portion:' },
-    free:         { pl:'+ gratis:', en:'+ free:' },
-    added:        { pl:'Dodano:', en:'Added:' },
-    confirmClear: { pl:'Czy na pewno chcesz wyczyścić koszyk?', en:'Are you sure you want to clear the cart?' },
-    allCat:       { pl:'Wszystkie', en:'All' },
-    otherCat:     { pl:'Inne', en:'Other' },
-    onePortion:   { pl:'1 porcja', en:'1 portion' }
+    title:        'Zamów - Bar Węgielstwo',
+    orderTitle:   'Zamów',
+    orderSubtitle:'Wybierz potrawy i porcje',
+    choosePortion:'Wybierz porcję',
+    freeExtras:   'Dodatki gratis',
+    skip:         'Pomiń',
+    addToCart:    'Dodaj do koszyka',
+    noMenu:       'Brak menu',
+    cart:         'Koszyk',
+    clear:        'Wyczyść',
+    order:        'Zamów',
+    orderPlaced:  '✔ Zamówienie złożone!',
+    emptyCart:    'Koszyk jest pusty',
+    noItems:      'Brak pozycji w tej kategorii',
+    menuError:    'Błąd wczytywania menu',
+    orderError:   'Błąd składania zamówienia',
+    error:        'Błąd:',
+    unknownError: 'Nieznany błąd',
+    portion:      'Porcja:',
+    free:         '+ gratis:',
+    added:        'Dodano:',
+    confirmClear: 'Czy na pewno chcesz wyczyścić koszyk?',
+    allCat:       'Wszystkie',
+    otherCat:     'Inne',
+    onePortion:   '1 porcja'
   };
 
-  function __(key) { return (T[key] && T[key][LANG]) || key; }
+  function __(key) { return T[key] || key; }
   
   function applyTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -193,7 +192,7 @@
   }
 
   function loadMenu() {
-    fetch('/api/menu?t=' + Date.now() + (LANG === 'en' ? '&lang=en' : ''))
+    fetch('/api/menu?t=' + Date.now())
       .then(r => r.json())
       .then(data => {
         menuItems = (Array.isArray(data) ? data : (data.menu_items || [])).filter(i => i.available !== false);
@@ -229,7 +228,7 @@
   }
 
   function loadPortions() {
-    fetch('/api/portions?t=' + Date.now() + (LANG === 'en' ? '&lang=en' : ''))
+    fetch('/api/portions?t=' + Date.now())
       .then(r => r.json())
       .then(data => {
         availablePortions = data.portions || [];
@@ -246,7 +245,7 @@
   }
 
   function loadExtras() {
-    fetch('/api/extras?t=' + Date.now() + (LANG === 'en' ? '&lang=en' : ''))
+    fetch('/api/extras?t=' + Date.now())
       .then(r => r.json())
       .then(data => {
         // Mapowanie na wypadek stringów bezpośrednich w tablicy
