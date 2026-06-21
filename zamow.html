@@ -63,9 +63,12 @@
   .cat-btn.active { color:#70d4e0; border-color:#70d4e0; background:rgba(0,200,220,0.06) }
 
   @media (max-width:480px) { .container { padding:16px 12px 200px } }
+
+  .bounce-logo-zamow { position:fixed; z-index:999; width:50px; height:28px; pointer-events:none; background:url(/static/BarWegielstwo.png) center/contain no-repeat; opacity:0.3; transform: translate3d(0,0,0); will-change:transform }
 </style>
 </head>
 <body>
+<div class="bounce-logo-zamow" id="bounce-logo-zamow"></div>
 <div class="container">
   <div class="header">
     <h1 data-i18n="orderTitle">Zamów</h1>
@@ -459,6 +462,19 @@
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
   }
+
+  // Mini bouncing logo
+  const logoEl = document.getElementById('bounce-logo-zamow');
+  let lx = 50, ly = 50, ldx = 1.8, ldy = 1.4;
+  function bounceLogo() {
+    const mw = window.innerWidth - 50, mh = window.innerHeight - 28;
+    lx += ldx; ly += ldy;
+    if (lx <= 0 || lx >= mw) { ldx = -ldx; lx = Math.max(0, Math.min(lx, mw)); }
+    if (ly <= 0 || ly >= mh) { ldy = -ldy; ly = Math.max(0, Math.min(ly, mh)); }
+    logoEl.style.left = lx + 'px'; logoEl.style.top = ly + 'px';
+    requestAnimationFrame(bounceLogo);
+  }
+  bounceLogo();
 </script>
 </body>
 </html>
