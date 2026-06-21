@@ -9,8 +9,6 @@
 <link rel="preconnect" href="https://i.giphy.com">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<link rel="preload" as="audio" href="/static/chicken.mp3">
-<link rel="preload" as="audio" href="/static/chicken2.mp3">
 <link rel="preload" as="audio" href="/static/NoweZamowienie.mp3">
 <link rel="preload" as="audio" href="/static/Wrealizacji.mp3">
 <link rel="preload" as="audio" href="/static/Gotowe.mp3">
@@ -40,7 +38,7 @@
   /* Optymalizacja renderowania warstw animacji przez GPU */
   .bounce-gif { position:fixed; z-index:0; width:220px; height:170px; pointer-events:none; background:url('https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExbW01b3N6b3Nidm94bmlvY3M0Y3g0Y2ptY3RwMDh3d3g5NXp0Z29pbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Vuw9m5wXviFIQ/giphy.gif') center/contain no-repeat; transform: translate3d(0,0,0); will-change:transform }
   .bounce-logo { position:fixed; z-index:0; width:360px; height:198px; pointer-events:none; background:url(/static/BarWegielstwo.png) center/contain no-repeat; opacity:0.7; transform: translate3d(0,0,0); will-change:transform }
-  .bounce-kurczaki { position:fixed; z-index:0; width:240px; height:144px; pointer-events:none; background:url(/static/Kurczaki.png) center/contain no-repeat; transform: translate3d(0,0,0); will-change:transform }
+  .bounce-kurczaki { position:fixed; z-index:0; width:240px; height:144px; pointer-events:none; background:url(/static/BarWegielstwo.png) center/contain no-repeat; transform: translate3d(0,0,0); will-change:transform }
 
   .splash { position:fixed; top:0; left:0; width:100%; height:100%; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; transition:opacity .6s }
   .splash.hidden { opacity:0 }
@@ -91,8 +89,8 @@
   <div class="title">STEROWANIE</div>
   <table>
     <tr><td>R</td><td>pokaż / ukryj wszystkie</td></tr>
-    <tr><td>1-3</td><td>pokaż / ukryj + wycisz (1=rick, 2=logo, 3=kurczaki)</td></tr>
-    <tr><td>4-6</td><td>tylko wycisz (4=rick, 5=logo, 6=kurczaki)</td></tr>
+    <tr><td>1-3</td><td>pokaż / ukryj (1=rick, 2=logo, 3=logo)</td></tr>
+    <tr><td>4-6</td><td>tylko wycisz (4=rick, 5=logo, 6=logo)</td></tr>
     <tr><td>H</td><td>pokaż / ukryj licznik uderzeń</td></tr>
     <tr><td>`</td><td>zamknij to okno</td></tr>
   </table>
@@ -104,7 +102,7 @@ const CACHE_KEY = 'tablica_orders', CACHE_TTL = 2000;
 
 // Audio — pre-fetch jako blob
 const AUDIO_BLOBS = {};
-['chicken.mp3','chicken2.mp3','NoweZamowienie.mp3','Wrealizacji.mp3','Gotowe.mp3','anulowano.mp3']
+['NoweZamowienie.mp3','Wrealizacji.mp3','Gotowe.mp3','anulowano.mp3']
 .forEach(f => fetch('/static/'+f).then(r=>r.blob()).then(b=>{AUDIO_BLOBS[f]=URL.createObjectURL(b)}).catch(()=>{}));
 
 let audioUnlocked = false;
@@ -226,12 +224,6 @@ function playSound(status) {
   if (f) playCached('/static/'+f, 0.4, 0.85, 1.25);
 }
 
-let chickenToggle = false;
-function playChicken() {
-  chickenToggle = !chickenToggle;
-  playCached(chickenToggle ? '/static/chicken.mp3' : '/static/chicken2.mp3', 0.5, 0.9, 1.1);
-}
-
 function checkDzwonek() {
   fetch('/api/dzwonek?t='+Date.now()).then(r=>r.json()).then(d=>{if(d.ring)playCached('/static/Gotowe.mp3',0.3,0.85,1.15)}).catch(()=>{});
 }
@@ -277,7 +269,7 @@ function randomColor() { return cols[Math.floor(Math.random()*cols.length)] }
 const els = [
   { el: document.getElementById('bounce-gif'),     baseW:110, baseH:85, w:110, h:85, x:100, y:100,  dx:3.0, dy:2.4,  hits:0, vis:true, key:'1', label:'rick' },
   { el: document.getElementById('bounce-logo'),    baseW:180, baseH:99, w:180, h:99, x:300, y:200,  dx:-2.0,dy:2.8,  sound: null,          hits:0, vis:true, mute:false, key:'2' },
-  { el: document.getElementById('bounce-kurczaki'),baseW:120, baseH:72, w:120, h:72, x:200, y:400,  dx:-2.4,dy:-3.2, sound:'chicken',     hits:0, vis:true, mute:false, key:'3' },
+  { el: document.getElementById('bounce-kurczaki'),baseW:120, baseH:72, w:120, h:72, x:200, y:400,  dx:-2.4,dy:-3.2, sound: null,     hits:0, vis:true, mute:false, key:'3' },
 ];
 let gifVisible = true, bounceId = null;
 let BASE_DX, BASE_DY, resScale = 1;
@@ -308,8 +300,6 @@ function bounceAll() {
     e.el.style.left = e.x + 'px'; e.el.style.top = e.y + 'px';
     if (bounced) {
       e.hits++;
-      // updateHud();
-      if (!e.mute && e.sound === 'chicken') playChicken();
     }
   });
   bounceId = requestAnimationFrame(bounceAll);
