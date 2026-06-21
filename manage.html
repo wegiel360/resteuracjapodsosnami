@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restauracja pod Sosnami - Zarządzanie</title>
+<link rel="stylesheet" href="/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<script src="/script.js"></script>
+<style>
+  body { font-size:14px; font-family:system-ui,-apple-system,sans-serif,'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif; color:#b0c8d0 }
+  .header { display:flex; align-items:center; gap:16px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(0,200,220,0.15) }
+  .logo { height:28px; opacity:0.7; filter:drop-shadow(0 0 4px rgba(0,200,220,0.3)) }
+  h1 { font-size:1.1rem; font-weight:600; color:#7ecfd4; text-shadow:0 0 12px rgba(0,200,220,0.15) }
+  .tab-bar { display:flex; gap:4px; margin-bottom:24px; border-bottom:1px solid rgba(0,200,220,0.1); padding-bottom:0 }
+  .tab-btn { padding:8px 16px; border:none; background:none; color:#5a8a94; font:inherit; font-size:0.85rem; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:0.15s; border-radius:6px 6px 0 0 }
+  .tab-btn:hover { color:#8cd4de; background:rgba(0,200,220,0.04) }
+  .tab-btn.active { color:#70d4e0; border-bottom-color:#00d4e0; text-shadow:0 0 8px rgba(0,212,224,0.2) }
+  .section { display:none; padding:0 }
+  .section.active { display:block }
+  .section-title { font-size:1.1rem; font-weight:600; color:#7ecfd4; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid rgba(180,200,220,0.08); text-shadow:0 0 8px rgba(0,200,220,0.1) }
+  
+  /* Czysty układ 3 kolumn bez bocznego panelu */
+  .form-grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+  .form-tile { background: linear-gradient(145deg, rgba(40,55,65,0.1), rgba(20,30,40,0.15)); border: 1px solid rgba(0,200,220,0.08); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; min-height: 120px; box-sizing: border-box; }
+  .form-tile input { width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(180,200,220,0.2); color: #b0c8d0; font-size: 1rem; padding: 8px 0; outline: none; transition: border-color 0.2s; }
+  .form-tile input:focus { border-bottom-color: #00d4e0; }
+
+  .list-container { display:flex; flex-direction:column; gap:2px; margin-bottom:12px; max-width:100%; overflow-x:auto }
+  .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,8,12,0.85); z-index:2000; justify-content:center; align-items:center }
+  .modal-content { background:linear-gradient(145deg, rgba(70,90,100,0.15), rgba(30,40,50,0.2)); padding:24px; max-width:600px; width:90%; max-height:90vh; overflow-y:auto; border:1px solid rgba(180,200,220,0.08); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) }
+  .menu-list-wrapper { background:linear-gradient(145deg,rgba(100,120,130,0.06),rgba(40,50,60,0.1)); border:1px solid rgba(180,200,220,0.08); border-radius:12px; overflow:hidden; }
+  .menu-list-header { display:grid; padding:12px 16px; background:linear-gradient(145deg,rgba(100,120,130,0.1),rgba(40,50,60,0.15)); border-bottom:1px solid rgba(180,200,220,0.08); color:#7ecfd4; font-size:0.85rem; font-weight:600; }
+  h3 { font-size:0.95rem; color:#6a9aa8; margin-bottom:12px; font-weight:500 }
+  .container { max-width:1400px; padding:32px; margin:0 auto }
+  
+  @media (max-width:768px) {
+    .form-grid-layout { grid-template-columns: 1fr; }
+    .form-tile { min-height: auto; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img src="/static/Logo.png" alt="Logo" class="logo">
+    <h1>Zarządzanie</h1>
+    <span style="margin-left:auto;font-size:0.75rem;color:#444" id="clock"></span>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('orders')">Zamówienia</button>
+    <button class="tab-btn" onclick="switchTab('menu')">Menu</button>
+  </div>
+
+  <div id="section-orders" class="section active">
+    <h2 class="section-title">Zamówienia</h2>
+    <div class="menu-list-wrapper">
+      <div class="menu-list-header" style="grid-template-columns:1fr 120px 160px;">
+        <div>POTRAWY</div>
+        <div style="text-align:center;">STATUS</div>
+        <div style="text-align:center;">AKCJA</div>
+      </div>
+      <div class="orders-grid" id="orders-grid"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:15px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-gold" onclick="ringDzwonek()">Dzwonek</button>
+      <button class="btn btn-red" onclick="clearAllOrders()">Usuń wszystkie zamówienia</button>
+      <span style="font-size:0.7rem;color:#444" id="cleanup-info"></span>
+    </div>
+  </div>
+
+  <div id="section-menu" class="section">
+    <h2 class="section-title">Zarządzanie Menu</h2>
+    
+    <div class="form-grid-layout">
+      <div class="form-tile">
+        <input type="text" id="new-item-name" placeholder="Nazwa potrawy">
+      </div>
+      <div class="form-tile">
+        <input type="text" id="new-item-emoji" placeholder="Wklej emoji (Gboard / Emojipedia)">
+      </div>
+      <div class="form-tile">
+        <input type="text" id="new-item-category" placeholder="Kategoria" list="cat-list">
+        <datalist id="cat-list">
+          <option value="Dania Główne"><option value="Zupy"><option value="Napoje"><option value="Desery"><option value="Przystawki"><option value="Inne">
+        </datalist>
+      </div>
+    </div>
+    
+    <button class="btn btn-green" onclick="addMenuItem()" style="margin-bottom:25px;">Dodaj pozycję</button>
+
+    <h3 class="section-title">Lista Menu</h3>
+
+    <div class="menu-list-wrapper" style="margin-bottom:24px;">
+      <div class="menu-list-header" style="display:grid;grid-template-columns:2fr 1fr 1fr 80px;">
+        <div>NAZWA</div>
+        <div style="text-align:center;">KATEGORIA</div>
+        <div style="text-align:center;">DOSTĘPNOŚĆ</div>
+        <div style="text-align:center;">AKCJA</div>
+      </div>
+      <div class="menu-list" id="menu-list" style="max-height:400px;overflow-y:auto;"></div>
+    </div>
+
+    <h3 class="section-title">Dodatki gratis</h3>
+    <div class="form-group" style="margin-bottom:16px;">
+      <input type="text" id="new-extra-name" placeholder="Nazwa dodatku (np. Sól, Pieprz)" style="width:100%; max-width:400px; padding:10px; background:rgba(0,0,0,0.2); border:1px solid rgba(180,200,220,0.1); color:#b0c8d0; border-radius:6px; margin-bottom:10px;">
+      <br>
+      <button class="btn btn-green" onclick="addExtra()">Dodaj dodatek gratis</button>
+    </div>
+    <div class="menu-list-wrapper">
+      <div class="menu-list-header" style="display:grid;grid-template-columns:2fr 1fr 80px;">
+        <div>NAZWA</div>
+        <div style="text-align:center;">DOSTĘPNOŚĆ</div>
+        <div style="text-align:center;">AKCJA</div>
+      </div>
+      <div class="extras-list" id="extras-list" style="max-height:400px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+    window.orders = [];
+    window.menuItems = [];
+
+    function apiCall(url, method = 'GET', body = null) {
+        const options = { method };
+        if (body) {
+            options.headers = { 'Content-Type': 'application/json' };
+            options.body = JSON.stringify(body);
+        }
+        return fetch(url, options).then(r => r.json()).catch(e => console.error(`API Error (${url}):`, e));
+    }
+
+    function cycleOrderStatus(orderId) {
+        const order = orders.find(o => o.id === orderId);
+        if (!order) return;
+        const nextStatus = { 'Zamówione': 'W realizacji', 'W realizacji': 'Gotowe' }[order.status] || 'Zamówione';
+        apiCall(`/api/orders/${orderId}`, 'PUT', { status: nextStatus }).then(() => loadOrders());
+    }
+
+    function cancelOrder(orderId) {
+        document.getElementById('cancel-order-id').value = orderId;
+        document.getElementById('cancel-reason').value = '';
+        document.getElementById('cancel-modal').style.display = 'flex';
+    }
+
+    function submitCancel() {
+        const orderId = document.getElementById('cancel-order-id').value;
+        const reason = document.getElementById('cancel-reason').value.trim();
+        if (!orderId) return;
+        apiCall(`/api/orders/${orderId}`, 'PUT', { status: 'Anulowane', reason }).then(() => {
+            document.getElementById('cancel-modal').style.display = 'none';
+            loadOrders();
+        });
+    }
+
+    function deleteOrderFromCard(orderId, event) {
+        event.stopPropagation();
+        if (confirm('Czy na pewno chcesz usunąć to zamówienie?')) {
+            apiCall(`/api/orders/${orderId}`, 'DELETE').then(() => loadOrders());
+        }
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + tab).classList.add('active');
+        document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+        if (tab === 'menu') loadExtras();
+    }
+
+    function clearAllOrders() {
+        if (confirm('Czy na pewno chcesz usunąć wszystkie zamówienia?')) {
+            apiCall('/api/orders/clear', 'DELETE').then(() => { loadOrders(); });
+        }
+    }
+
+    function runCleanup() {
+        apiCall('/api/cleanup', 'POST').then(d => {
+            if (!d) return;
+            loadOrders();
+            document.getElementById('cleanup-info').textContent = `Usunięto: ${d.deleted} | ${new Date(d.last_run).toLocaleString('pl-PL')}`;
+        });
+    }
+
+    function addMenuItem() {
+        const name = document.getElementById('new-item-name').value.trim();
+        const emoji = document.getElementById('new-item-emoji').value.trim();
+        const category = document.getElementById('new-item-category').value.trim() || 'Inne';
+        if (!name || !emoji) return alert('Wprowadź nazwę i wklej emoji potrawy');
+
+        apiCall('/api/menu', 'POST', { name, emoji, category, available: true }).then(() => {
+            document.getElementById('new-item-name').value = '';
+            document.getElementById('new-item-emoji').value = '';
+            document.getElementById('new-item-category').value = '';
+            loadMenu();
+        });
+    }
+
+    function toggleMenuItemAvailability(itemName, available) {
+        apiCall(`/api/menu/${encodeURIComponent(itemName)}`, 'PUT', { available }).then(() => loadMenu());
+    }
+
+    function deleteMenuItemFromList(itemName) {
+        if (confirm(`Czy na pewno chcesz usunąć "${itemName}" z menu?`)) {
+            apiCall(`/api/menu/${encodeURIComponent(itemName)}`, 'DELETE').then(() => loadMenu());
+        }
+    }
+
+    function loadExtras() {
+        apiCall('/api/extras').then(d => {
+            if (!d) return;
+            const extras = d.extras || [];
+            document.getElementById('extras-list').innerHTML = extras.map(e => {
+                const x = typeof e === 'string' ? { name: e, emoji: '', available: true } : e;
+                return `
+                    <div class="list-item" style="display:grid;grid-template-columns:2fr 1fr 80px;padding:10px 16px;border-bottom:1px solid rgba(180,200,220,0.06);align-items:center;">
+                        <span style="color:#8cc8d0;font-size:0.85rem;">${x.emoji || ''} ${x.name}</span>
+                        <span style="color:${x.available ? '#4ade80' : '#f87171'};font-size:0.8rem;text-align:center;">${x.available ? 'Dostępne' : 'Niedostępne'}</span>
+                        <div style="display:flex;gap:4px;justify-content:center;">
+                            <button class="btn btn-sm" onclick="toggleExtraAvailability('${x.name}', ${!x.available})">Zmień</button>
+                            <button class="btn btn-sm" onclick="deleteExtra('${x.name}')">Usuń</button>
+                        </div>
+                    </div>`;
+            }).join('');
+        });
+    }
+
+    function addExtra() {
+        const n = document.getElementById('new-extra-name').value.trim();
+        if (!n) return alert('Wprowadź nazwę dodatku');
+        apiCall('/api/extras', 'POST', { name: n }).then(() => {
+            document.getElementById('new-extra-name').value = '';
+            loadExtras();
+        });
+    }
+
+    function deleteExtra(name) {
+        if (confirm(`Usunąć dodatek "${name}"?`)) {
+            apiCall(`/api/extras/${encodeURIComponent(name)}`, 'DELETE').then(() => loadExtras());
+        }
+    }
+
+    function toggleExtraAvailability(name, available) {
+        apiCall(`/api/extras/${encodeURIComponent(name)}`, 'PUT', { available }).then(() => loadExtras());
+    }
+
+    function loadOrders() {
+        fetch('/bazadanych.json?t=' + Date.now())
+        .then(r => r.json())
+        .then(d => {
+            const now = Date.now();
+            (d.orders || []).forEach(o => {
+                if (o.status === 'Gotowe' && o.timestamp && now - new Date(o.timestamp).getTime() > 30*60*1000)
+                    fetch('/api/orders/' + o.id, { method: 'DELETE' }).catch(() => {});
+            });
+            window.orders = (d.orders || []).filter(o => o.status !== 'Gotowe' || !o.timestamp || now - new Date(o.timestamp).getTime() <= 30*60*1000);
+            renderOrders();
+        }).catch(() => { window.orders = []; renderOrders(); });
+    }
+
+    function loadMenu() {
+        fetch('/bazadanych.json?t=' + Date.now())
+        .then(r => r.json())
+        .then(d => {
+            window.menuItems = d.menu_items || [];
+            renderMenuList();
+        }).catch(() => { window.menuItems = []; renderMenuList(); });
+    }
+
+    function renderOrders() {
+        const grid = document.getElementById('orders-grid');
+        if (orders.length === 0) return grid.innerHTML = '<div class="list-empty" style="padding:16px; text-align:center; color:#5a8a94;">Brak zamówień</div>';
+
+        const grouped = {};
+        orders.forEach(o => {
+            if (!grouped[o.id]) grouped[o.id] = { status: o.status, orderId: o.id, items: [] };
+            grouped[o.id].items.push(o);
+        });
+
+        grid.innerHTML = Object.values(grouped).map(g => {
+            const items = g.items.map(o => (o.items || [o]).map(i => `${i.emoji || ''} ${i.item_name || i.name || '?'}`).join(', ')).join(', ');
+            const color = g.status === 'Gotowe' ? '#4ade80' : g.status === 'Anulowane' ? '#f87171' : g.status === 'W realizacji' ? '#fbbf24' : '#40d0b0';
+            return `
+                <div class="list-item" style="display:grid;grid-template-columns:1fr 120px 160px;padding:10px 16px;border-bottom:1px solid rgba(180,200,220,0.06);align-items:center;">
+                    <span style="color:#8cc8d0;font-size:0.85rem;">${items}</span>
+                    <span style="color:${color};font-size:0.8rem;text-align:center;">${g.status}</span>
+                    <div style="display:flex;gap:4px;justify-content:center;">
+                        <button class="btn btn-sm" onclick="cycleOrderStatus('${g.orderId}')">Zmień</button>
+                        <button class="btn btn-sm" onclick="cancelOrder('${g.orderId}')">Anuluj</button>
+                        <button class="btn btn-sm" onclick="deleteOrderFromCard('${g.orderId}', event)">Usuń</button>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    function renderMenuList() {
+        const list = document.getElementById('menu-list');
+        document.getElementById('menu-count').textContent = menuItems.length;
+        if (menuItems.length === 0) return list.innerHTML = '<div class="list-empty" style="padding:16px; text-align:center; color:#5a8a94;">Brak pozycji w menu</div>';
+
+        list.innerHTML = menuItems.map(item => `
+            <div class="list-item" style="display:grid;grid-template-columns:2fr 1fr 1fr 80px;padding:10px 16px;border-bottom:1px solid rgba(180,200,220,0.06);align-items:center;">
+                <span style="color:#8cc8d0;font-size:0.85rem;">${item.emoji} ${item.name}</span>
+                <span style="color:#5a8a94;font-size:0.78rem;text-align:center;">${item.category || 'Inne'}</span>
+                <span style="color:${item.available ? '#4ade80' : '#f87171'};font-size:0.8rem;text-align:center;">${item.available ? 'Dostępne' : 'Niedostępne'}</span>
+                <div style="display:flex;gap:4px;justify-content:center;">
+                    <button class="btn btn-sm" onclick="toggleMenuItemAvailability('${item.name}', ${!item.available})">Zmień</button>
+                    <button class="btn btn-sm" onclick="deleteMenuItemFromList('${item.name}')">Usuń</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function saveDanieDnia() {
+        const val = document.getElementById('danie-dnia-input').value.trim();
+        apiCall('/api/danie-dnia', 'POST', { danie: val }).then(() => {
+            const status = document.getElementById('danie-dnia-status');
+            status.textContent = 'Zapisano!';
+            setTimeout(() => status.textContent = '', 2000);
+        });
+    }
+
+    function ringDzwonek() { apiCall('/api/ring', 'POST'); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadOrders(); loadMenu(); loadExtras();
+        fetch('/bazadanych.json').then(r => r.json()).then(d => {
+            if (d.last_cleanup) document.getElementById('cleanup-info').textContent = 'Ostatnie: ' + new Date(d.last_cleanup).toLocaleString('pl-PL');
+            if (d.danie_dnia) document.getElementById('danie-dnia-input').value = d.danie_dnia;
+        }).catch(() => {});
+        setInterval(loadOrders, 3000);
+    });
+</script>
+
+<div class="modal" id="cancel-modal">
+  <div class="modal-content" style="max-width:400px;">
+    <h3 style="margin-bottom:12px;color:#f87171">Anuluj zamówienie</h3>
+    <input type="hidden" id="cancel-order-id">
+    <textarea id="cancel-reason" placeholder="Podaj powód anulowania..." style="width:100%;min-height:80px;padding:10px;border:1px solid rgba(180,200,220,0.08);background:rgba(0,0,0,0.3);color:#b0d4e0;font:inherit;font-size:0.85rem;border-radius:8px;resize:vertical;box-sizing:border-box;margin-bottom:12px"></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn" onclick="document.getElementById('cancel-modal').style.display='none'">Wróć</button>
+      <button class="btn btn-red" onclick="submitCancel()">Anuluj zamówienie</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

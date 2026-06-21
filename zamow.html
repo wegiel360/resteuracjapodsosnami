@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title data-i18n="title">Zamów - Restauracja pod Sosnami</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+  body { font-size:14px; font-family:system-ui,-apple-system,sans-serif; color:#b0c8d0 }
+  .container { max-width:480px; padding:24px 16px 200px; margin:0 auto }
+
+  .header { text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid rgba(0,200,220,0.12) }
+  .header h1 { font-size:1.3rem; font-weight:600; color:#7ecfd4; text-shadow:0 0 12px rgba(0,200,220,0.1) }
+  .header p { font-size:0.8rem; color:#5a8a94; margin-top:4px }
+
+  .tab-content { display:block }
+
+  .menu-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-bottom:24px }
+  .menu-item { padding:14px; border:1px solid rgba(180,200,220,0.08); text-align:center; cursor:pointer; transition:0.15s; border-radius:12px; background:linear-gradient(145deg, rgba(100,120,130,0.08), rgba(40,50,60,0.14)); box-shadow:0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.1) }
+  .menu-item:hover { border-color:rgba(180,200,220,0.15); box-shadow:0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08); transform:translateY(-1px) }
+  .menu-item.selected { border-color:#70d4e0; box-shadow:0 0 20px rgba(0,200,220,0.08), inset 0 1px 0 rgba(0,200,220,0.1) }
+  .item-emoji { font-size:2rem; display:block; margin-bottom:6px }
+  .item-name { font-size:0.9rem; color:#8cc8d0; margin-bottom:4px }
+
+  .portions-section { border:1px solid rgba(180,200,220,0.08); padding:16px; margin-bottom:16px; border-radius:10px; background:linear-gradient(145deg, rgba(100,120,130,0.06), rgba(40,50,60,0.1)) }
+  .portions-title { font-size:0.9rem; color:#6a9aa8; margin-bottom:12px; text-align:center }
+  .portions-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(80px,1fr)); gap:6px }
+  .portion-btn { padding:10px; border:1px solid rgba(180,200,220,0.08); background:linear-gradient(145deg, rgba(100,120,130,0.06), rgba(40,50,60,0.1)); color:#6a9aa8; cursor:pointer; font:inherit; font-size:0.8rem; transition:0.15s; text-align:center; border-radius:8px }
+  .portion-btn:hover { border-color:rgba(180,200,220,0.15); color:#8cc8d0 }
+  .portion-btn.selected { border-color:#70d4e0; color:#70d4e0; box-shadow:0 0 12px rgba(0,200,220,0.08) }
+
+  .extras-section { border:1px solid rgba(0,200,220,0.1); padding:16px; margin:16px 0; border-radius:10px; background:linear-gradient(145deg,rgba(0,180,200,0.03),transparent) }
+  .extras-title { font-size:0.9rem; color:#6a9aa8; margin-bottom:12px; text-align:center }
+  .extras-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:6px }
+  .extra-btn { padding:10px; border:1px solid rgba(180,200,220,0.08); text-align:center; cursor:pointer; transition:0.15s; color:#6a9aa8; font-size:0.8rem; border-radius:8px; background:linear-gradient(145deg, rgba(100,120,130,0.06), rgba(40,50,60,0.1)) }
+  .extra-btn:hover { border-color:rgba(180,200,220,0.15); color:#8cc8d0 }
+  .extra-btn.selected { border-color:#70d4e0; color:#70d4e0; box-shadow:0 0 12px rgba(0,200,220,0.06), inset 0 1px 0 rgba(0,200,220,0.08) }
+
+  .pers-actions { display:flex; gap:8px; justify-content:center; margin-top:16px }
+
+  .cart-section { position:fixed; bottom:0; left:0; right:0; background:linear-gradient(145deg, rgba(50,70,80,0.18), rgba(20,30,40,0.25)); padding:16px; border-top:1px solid rgba(180,200,220,0.08); box-shadow:0 -4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04); z-index:99 }
+  .cart-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px }
+  .cart-title { font-size:0.95rem; color:#7ecfd4; font-weight:500 }
+  .cart-count { background:rgba(0,200,220,0.1); color:#70d4e0; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; border-radius:50% }
+  .cart-items { max-height:160px; overflow-y:auto; margin-bottom:12px }
+  .cart-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(0,200,220,0.06); font-size:0.85rem }
+  .cart-item-info { flex:1 }
+  .cart-item-name { color:#8cc8d0; margin-bottom:2px }
+  .cart-item-portion { color:#4a7a84; font-size:0.75rem }
+  .cart-remove { background:none; border:none; color:#4a7a84; cursor:pointer; font-size:1rem; padding:4px; transition:0.15s }
+  .cart-remove:hover { color:#f87171 }
+  .cart-actions { display:flex; gap:8px }
+
+  .order-modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,8,12,0.85); display:flex; align-items:center; justify-content:center; z-index:1000 }
+  .order-modal-content { background:linear-gradient(145deg, rgba(70,90,100,0.2), rgba(30,40,50,0.25)); border:1px solid rgba(180,200,220,0.08); padding:24px; max-width:440px; width:90%; border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06); text-align:center }
+  .order-modal-content h2 { font-size:1rem; color:#7ecfd4; margin-bottom:12px }
+
+  .toast { position:fixed; top:16px; right:16px; background:linear-gradient(145deg, rgba(70,90,100,0.15), rgba(30,40,50,0.2)); color:#8cc8d0; padding:8px 14px; z-index:1000; border:1px solid rgba(180,200,220,0.08); border-radius:8px; font-size:0.85rem; box-shadow:0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) }
+
+  .cat-tabs { display:flex; gap:4px; margin-bottom:16px; flex-wrap:wrap; justify-content:center }
+  .cat-btn { padding:6px 14px; border:1px solid rgba(180,200,220,0.08); background:linear-gradient(145deg,rgba(100,120,130,0.06),rgba(40,50,60,0.1)); color:#5a8a94; font:inherit; font-size:0.8rem; cursor:pointer; border-radius:16px; transition:0.15s }
+  .cat-btn:hover { color:#8cc8d0; border-color:rgba(180,200,220,0.15) }
+  .cat-btn.active { color:#70d4e0; border-color:#70d4e0; background:rgba(0,200,220,0.06) }
+
+  @media (max-width:480px) { .container { padding:16px 12px 200px } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1 data-i18n="orderTitle">Zamów</h1>
+    <p data-i18n="orderSubtitle">Wybierz potrawy i porcje</p>
+  </div>
+
+  <div id="tab-order" class="tab-content">
+    <div class="cat-tabs" id="cat-tabs"></div>
+    <div id="menu-content" style="display: none;">
+      <div id="menu-grid" class="menu-grid"></div>
+
+      <div id="portions-section" class="portions-section" style="display: none;">
+        <div class="portions-title" data-i18n="choosePortion">Wybierz porcję</div>
+        <div id="portions-grid" class="portions-grid"></div>
+
+        <div class="extras-section" id="extras-section" style="display: none;">
+          <div class="extras-title" data-i18n="freeExtras">Dodatki gratis</div>
+          <div id="extras-grid" class="extras-grid"></div>
+        </div>
+
+        <div class="pers-actions">
+          <button class="btn btn-secondary" onclick="skipPersonalization()" data-i18n="skip">Pomiń</button>
+          <button class="btn btn-primary" onclick="addWithAddons()" data-i18n="addToCart">Dodaj do koszyka</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display: none;">
+      <p data-i18n="noMenu">Brak menu</p>
+    </div>
+  </div>
+
+  <div class="cart-section">
+    <div class="cart-container">
+      <div class="cart-header">
+        <div class="cart-title" data-i18n="cart">Koszyk</div>
+        <div class="cart-count" id="cart-count">0</div>
+      </div>
+    <div class="cart-items" id="cart-items"></div>
+    
+    <div class="cart-actions">
+      <button class="btn btn-secondary" onclick="clearCart()" data-i18n="clear">Wyczyść</button>
+      <button class="btn btn-primary" onclick="placeOrder()" style="flex:1" data-i18n="order">Zamów</button>
+    </div>
+    </div>
+  </div>
+
+  <div id="order-modal" class="order-modal" style="display: none;">
+    <div class="order-modal-content">
+      <h2 data-i18n="orderPlaced">✔ Zamówienie złożone!</h2>
+      <pre id="receipt-display" style="text-align:left;font-size:0.8rem;color:#8cc8d0;background:rgba(0,0,0,0.3);padding:12px;border-radius:8px;white-space:pre-wrap;max-height:300px;overflow-y:auto;font-family:monospace;margin:12px 0;"></pre>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeOrderModal()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const LANG = window.location.pathname.endsWith('/en') ? 'en' : 'pl';
+  const T = {
+    title:        { pl:'Zamów - Restauracja pod Sosnami', en:'Order - Restaurant pod Sosnami' },
+    orderTitle:   { pl:'Zamów', en:'Order' },
+    orderSubtitle:{ pl:'Wybierz potrawy i porcje', en:'Choose dishes and portions' },
+    choosePortion:{ pl:'Wybierz porcję', en:'Choose portion' },
+    freeExtras:   { pl:'Dodatki gratis', en:'Free extras' },
+    skip:         { pl:'Pomiń', en:'Skip' },
+    addToCart:    { pl:'Dodaj do koszyka', en:'Add to cart' },
+    noMenu:       { pl:'Brak menu', en:'No menu' },
+    cart:         { pl:'Koszyk', en:'Cart' },
+    clear:        { pl:'Wyczyść', en:'Clear' },
+    order:        { pl:'Zamów', en:'Order' },
+    orderPlaced:  { pl:'✔ Zamówienie złożone!', en:'✔ Order placed!' },
+    emptyCart:    { pl:'Koszyk jest pusty', en:'Cart is empty' },
+    noItems:      { pl:'Brak pozycji w tej kategorii', en:'No items in this category' },
+    menuError:    { pl:'Błąd wczytywania menu', en:'Error loading menu' },
+    orderError:   { pl:'Błąd składania zamówienia', en:'Error placing order' },
+    error:        { pl:'Błąd:', en:'Error:' },
+    unknownError: { pl:'Nieznany błąd', en:'Unknown error' },
+    portion:      { pl:'Porcja:', en:'Portion:' },
+    free:         { pl:'+ gratis:', en:'+ free:' },
+    added:        { pl:'Dodano:', en:'Added:' },
+    confirmClear: { pl:'Czy na pewno chcesz wyczyścić koszyk?', en:'Are you sure you want to clear the cart?' },
+    allCat:       { pl:'Wszystkie', en:'All' },
+    otherCat:     { pl:'Inne', en:'Other' },
+    onePortion:   { pl:'1 porcja', en:'1 portion' }
+  };
+
+  function __(key) { return (T[key] && T[key][LANG]) || key; }
+  
+  function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (T[key]) el.innerHTML = __(key);
+    });
+  }
+
+  let menuItems = [];
+  let availablePortions = [];
+  let availableExtras = [];
+  let cart = [];
+  let selectedItem = null;
+  let selectedPortion = __('onePortion');
+  let selectedCategory = 'Wszystkie';
+  let selectedExtras = {};
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTranslations();
+    const savedCart = localStorage.getItem('kiosk_cart');
+    if (savedCart) {
+      try { cart = JSON.parse(savedCart); } catch (e) { cart = []; }
+    }
+    loadMenu();
+    loadPortions();
+    loadExtras();
+    updateCart();
+  });
+
+  function saveAndNotify() {
+    localStorage.setItem('kiosk_cart', JSON.stringify(cart));
+    updateCart();
+  }
+
+  function loadMenu() {
+    fetch('/api/menu?t=' + Date.now() + (LANG === 'en' ? '&lang=en' : ''))
+      .then(r => r.json())
+      .then(data => {
+        menuItems = (Array.isArray(data) ? data : (data.menu_items || [])).filter(i => i.available !== false);
+        renderCategoryTabs();
+        if (menuItems.length === 0) showEmptyState();
+        else renderMenu();
+      })
+      .catch(() => {
+        showToast(__('menuError'), 'error');
+        showEmptyState();
+      });
+  }
+
+  function renderCategoryTabs() {
+    const cats = ['Wszystkie', ...new Set(menuItems.map(i => i.category || 'Inne'))];
+    const tabs = document.getElementById('cat-tabs');
+    tabs.innerHTML = cats.map(c => {
+      const cleanLabel = c === 'Wszystkie' ? __('allCat') : (c === 'Inne' ? __('otherCat') : c);
+      const safeClick = c.replace(/'/g, "\\'");
+      return `<div class="cat-btn ${c === selectedCategory ? 'active' : ''}" onclick="selectCategory('${safeClick}')">${cleanLabel}</div>`;
+    }).join('');
+  }
+
+  function selectCategory(cat) {
+    selectedCategory = cat;
+    renderCategoryTabs();
+    renderMenu();
+  }
+
+  function getFilteredItems() {
+    if (selectedCategory === 'Wszystkie') return menuItems;
+    return menuItems.filter(i => (i.category || 'Inne') === selectedCategory);
+  }
+
+  function loadPortions() {
+    fetch('/api/portions?t=' + Date.now() + (LANG === 'en' ? '&lang=en' : ''))
+      .then(r => r.json())
+      .then(data => {
+        availablePortions = data.portions || [];
+        renderPortions();
+      })
+      .catch(() => {});
+  }
+
+  function renderPortions() {
+    const grid = document.getElementById('portions-grid');
+    grid.innerHTML = availablePortions.map(p => `
+      <div class="portion-btn ${selectedPortion === p ? 'selected' : ''}" onclick="selectPortion('${p}')">${p}</div>
+    `).join('');
+  }
+
+  function loadExtras() {
+    fetch('/api/extras?t=' + Date.now() + (LANG === 'en' ? '&lang=en' : ''))
+      .then(r => r.json())
+      .then(data => {
+        // Mapowanie na wypadek stringów bezpośrednich w tablicy
+        availableExtras = (data.extras || []).map(e => typeof e === 'string' ? {name:e, emoji:'', available:true} : e);
+        renderExtras();
+      })
+      .catch(() => {});
+  }
+
+  function renderExtras() {
+    const grid = document.getElementById('extras-grid');
+    if (!grid) return;
+    grid.innerHTML = availableExtras.filter(x => x.available !== false).map(x => `
+      <div class="extra-btn ${selectedExtras[x.name] ? 'selected' : ''}" onclick="toggleExtra('${x.name.replace(/'/g, "\\'")}')">
+        ${x.emoji || ''} ${x.name}
+      </div>
+    `).join('');
+  }
+
+  function toggleExtra(name) {
+    if (selectedExtras[name]) delete selectedExtras[name];
+    else selectedExtras[name] = true;
+    renderExtras();
+  }
+
+  function selectItem(realIndex) {
+    selectedItem = menuItems[realIndex];
+    if (selectedItem && selectedItem.category === 'Napoje') {
+      cart.push({
+        id: Date.now(),
+        name: selectedItem.name || '?',
+        emoji: selectedItem.emoji || '🍽️',
+        portion: __('onePortion'),
+        extras: []
+      });
+      showToast(__('added') + ' ' + selectedItem.name, 'success');
+      selectedItem = null;
+      renderMenu();
+      saveAndNotify();
+      return;
+    }
+    document.getElementById('portions-section').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('portions-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+    renderMenu();
+    showExtras();
+  }
+
+  function selectPortion(portion) {
+    selectedPortion = portion;
+    renderPortions();
+  }
+
+  function showExtras() {
+    const hasExtras = availableExtras.filter(x => x.available !== false).length > 0;
+    document.getElementById('extras-section').style.display = hasExtras ? 'block' : 'none';
+    renderExtras();
+  }
+
+  function addWithAddons() {
+    if (!selectedItem) return;
+    cart.push({
+      id: Date.now(),
+      name: selectedItem.name || 'Nieznana potrawa',
+      emoji: selectedItem.emoji || '🍽️',
+      portion: selectedPortion,
+      extras: Object.keys(selectedExtras)
+    });
+    showToast(__('added') + ' ' + selectedItem.name + ' (' + selectedPortion + ')', 'success');
+    resetSelection();
+  }
+
+  function skipPersonalization() {
+    if (!selectedItem) return;
+    cart.push({
+      id: Date.now(),
+      name: selectedItem.name || 'Nieznana potrawa',
+      emoji: selectedItem.emoji || '🍽️',
+      portion: selectedPortion,
+      extras: []
+    });
+    showToast(__('added') + ' ' + selectedItem.name + ' (' + selectedPortion + ')', 'success');
+    resetSelection();
+  }
+
+  function resetSelection() {
+    selectedItem = null;
+    selectedPortion = __('onePortion');
+    selectedExtras = {};
+    document.getElementById('portions-section').style.display = 'none';
+    document.getElementById('extras-section').style.display = 'none';
+    renderMenu();
+    saveAndNotify();
+  }
+
+  function updateCart() {
+    const itemsContainer = document.getElementById('cart-items');
+    document.getElementById('cart-count').textContent = cart.length;
+
+    if (cart.length === 0) {
+      itemsContainer.innerHTML = `<div style="text-align: center; opacity: 0.7; padding: 20px;">${__('emptyCart')}</div>`;
+      return;
+    }
+
+    itemsContainer.innerHTML = cart.map(item => `
+      <div class="cart-item">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.emoji} ${item.name}</div>
+          <div class="cart-item-portion">${__('portion')} ${item.portion}</div>
+          ${item.extras && item.extras.length ? `<div class="cart-item-portion">${__('free')} ${item.extras.join(', ')}</div>` : ''}
+        </div>
+        <button class="cart-remove" onclick="removeFromCart(${item.id})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function removeFromCart(itemId) {
+    cart = cart.filter(item => item.id !== itemId);
+    saveAndNotify();
+  }
+
+  function clearCart() {
+    if (cart.length === 0) return;
+    if (confirm(__('confirmClear'))) {
+      cart = [];
+      saveAndNotify();
+    }
+  }
+
+  function placeOrder() {
+    if (cart.length === 0) {
+      showToast(__('emptyCart') + '!', 'error');
+      return;
+    }
+
+    const btn = document.querySelector('button[onclick="placeOrder()"]');
+    const originalText = btn.textContent;
+    btn.textContent = 'Przygotowywanie...';
+    btn.disabled = true;
+
+    const payloadItems = cart.map(item => ({
+      name: item.name,
+      emoji: item.emoji,
+      portion: item.portion,
+      extras: item.extras || []
+    }));
+
+    // Uproszczone: Serwer czeka na zakończenie zapisu, potem odpowiada
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: payloadItems, notes: '' })
+    })
+    .then(r => r.json())
+    .then(data => {
+      btn.textContent = 'Zapisywanie...';
+      if (data.success) {
+        cart = [];
+        saveAndNotify();
+        document.getElementById('receipt-display').textContent = data.receipt || '';
+        document.getElementById('order-modal').style.display = 'flex';
+      } else {
+        showToast(__('error') + ' ' + (data.error || __('unknownError')), 'error');
+        console.error('Błąd generowania:', data.error);
+      }
+      btn.textContent = originalText;
+      btn.disabled = false;
+    })
+    .catch((err) => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      showToast(__('orderError'), 'error');
+      console.error('Błąd połączenia:', err);
+    });
+  }
+
+  function closeOrderModal() {
+    document.getElementById('order-modal').style.display = 'none';
+  }
+
+  function showEmptyState() {
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('menu-content').style.display = 'none';
+  }
+
+  function renderMenu() {
+    const grid = document.getElementById('menu-grid');
+    const items = getFilteredItems();
+    if (items.length === 0) {
+      grid.innerHTML = `<div style="text-align:center;padding:30px;color:#4a7a84;">${__('noItems')}</div>`;
+      return;
+    }
+    grid.innerHTML = items.map(item => {
+      const realIndex = menuItems.indexOf(item);
+      const isSelected = selectedItem?.name === item.name ? 'selected' : '';
+      return `
+        <div class="menu-item ${isSelected}" onclick="selectItem(${realIndex})">
+          <div class="item-emoji">${item.emoji || '🍽️'}</div>
+          <div class="item-name">${item.name || 'Nieznana potrawa'}</div>
+        </div>
+      `;
+    }).join('');
+    document.getElementById('menu-content').style.display = 'block';
+  }
+
+  function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    if (type === 'error') toast.style.borderColor = '#f8717180';
+    else if (type === 'success') toast.style.borderColor = '#4ade8080';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+</script>
+</body>
+</html>

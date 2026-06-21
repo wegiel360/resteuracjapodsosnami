@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tablica - Restauracja pod Sosnami</title>
+<link rel="stylesheet" href="/style.css">
+<script src="/script.js"></script>
+<link rel="preconnect" href="https://i.giphy.com">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<link rel="preload" as="audio" href="/static/chicken.mp3">
+<link rel="preload" as="audio" href="/static/chicken2.mp3">
+<link rel="preload" as="audio" href="/static/NoweZamowienie.mp3">
+<link rel="preload" as="audio" href="/static/Wrealizacji.mp3">
+<link rel="preload" as="audio" href="/static/Gotowe.mp3">
+<link rel="preload" as="audio" href="/static/anulowano.mp3">
+<style>
+  body { background:linear-gradient(135deg,#0a0e12 0%,#0d1a1f 50%,#091015 100%); font-family:system-ui,-apple-system,sans-serif; color:#b0c8d0; font-size:14px; overflow:hidden; height:100vh }
+  .container { position:relative; z-index:1; padding:20px; height:100vh; display:flex; flex-direction:column }
+  .orders { display:flex; flex-direction:column; gap:6px; flex:1; overflow-y:auto }
+  .order { background:rgba(0,200,220,0.03); border:1px solid rgba(180,200,220,0.06); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:0.15s }
+  .order:hover { background:rgba(0,200,220,0.06); border-color:rgba(180,200,220,0.1) }
+  .order-items { font-size:0.9rem; color:#8cc8d0; display:flex; gap:6px; flex-wrap:wrap }
+  .order-extras { font-size:0.75rem; color:#5a8a94; margin-top:2px }
+  .order-time { font-size:0.7rem; margin-top:2px }
+  .order-time.fresh { color:#4ade80 }
+  .order-time.warn { color:#fbbf24 }
+  .order-time.old { color:#f87171 }
+  .order-reason { font-size:0.7rem; color:#f87171; margin-top:2px; font-style:italic }
+  .order-item-text { white-space:nowrap }
+  .order-status { font-size:0.75rem; letter-spacing:0.05em; padding:2px 8px; border-radius:4px; border:1px solid currentColor; text-transform:uppercase; font-weight:500; white-space:nowrap }
+  .order-status.progress { color:#fbbf24 }
+  .order-status.ordered { color:#40d0b0 }
+  .order-status.done { color:#4ade80 }
+  .order-status.cancelled { color:#f87171 }
+  .order-status.returned { color:#a78bfa }
+  .empty { color:#4a7a84; font-size:0.9rem; text-align:center; padding:40px }
+  
+  /* Optymalizacja renderowania warstw animacji przez GPU */
+  .bounce-gif { position:fixed; z-index:0; width:220px; height:170px; pointer-events:none; background:url('https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExbW01b3N6b3Nidm94bmlvY3M0Y3g0Y2ptY3RwMDh3d3g5NXp0Z29pbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Vuw9m5wXviFIQ/giphy.gif') center/contain no-repeat; transform: translate3d(0,0,0); will-change:transform }
+  .bounce-logo { position:fixed; z-index:0; width:360px; height:198px; pointer-events:none; background:url(/static/Logo.png) center/contain no-repeat; opacity:0.7; transform: translate3d(0,0,0); will-change:transform }
+  .bounce-kurczaki { position:fixed; z-index:0; width:240px; height:144px; pointer-events:none; background:url(/static/Kurczaki.png) center/contain no-repeat; transform: translate3d(0,0,0); will-change:transform }
+
+  .splash { position:fixed; top:0; left:0; width:100%; height:100%; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; transition:opacity .6s }
+  .splash.hidden { opacity:0 }
+  .splash h1 { font-size:3rem; color:#7ecfd4; text-shadow:0 0 30px rgba(0,200,220,0.2); letter-spacing:4px; margin-bottom:12px }
+  .splash p { font-size:1rem; color:#5a8a94; margin-bottom:24px }
+  .splash .qr { background:#fff; padding:10px; border-radius:10px; display:inline-block }
+  .splash .qr canvas, .splash .qr img { display:block; width:150px; height:150px }
+  
+  .hud { position:fixed; top:12px; right:16px; z-index:10; font-size:0.75rem; color:#fff; text-align:right; pointer-events:none; transition:opacity .3s }
+  .hud.hidden { opacity:0 }
+  .info-bar { position:fixed; top:12px; left:16px; z-index:10; font-size:0.75rem; pointer-events:none; display:flex; gap:16px; align-items:center }
+  .info-bar .clock { color:#7ecfd4; font-weight:600; font-size:0.85rem }
+  .info-bar .danie-dnia { color:#fbbf24 }
+  
+  .help-overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:100; background:rgba(0,8,12,0.88); display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .25s }
+  .help-overlay.on { opacity:1; pointer-events:auto }
+  .help-overlay table { border-collapse:collapse; font-size:0.85rem }
+  .help-overlay td { padding:6px 18px; border-bottom:1px solid rgba(180,200,220,0.06); color:#8cc8d0 }
+  .help-overlay td:first-child { color:#7ecfd4; font-weight:600; text-align:right }
+  .help-overlay td:last-child { color:#5a8a94 }
+  .help-overlay .title { font-size:1.1rem; color:#7ecfd4; margin-bottom:20px; letter-spacing:2px }
+</style>
+</head>
+<body>
+<div class="splash" id="splash">
+  <div style="display:flex;gap:32px;align-items:center;flex-wrap:wrap;justify-content:center">
+    <div style="text-align:center">
+      <h1 style="font-size:2.5rem;margin-bottom:4px">Zamów coś!</h1>
+      <p style="margin-bottom:16px">Zeskanuj kod, aby zamówić</p>
+      <div class="qr" id="qr-pl"></div>
+    </div>
+    <div style="text-align:center">
+      <h1 style="font-size:2.5rem;margin-bottom:4px;color:#7ecfd4">Order something!</h1>
+      <p style="margin-bottom:16px">Scan the code to order</p>
+      <div class="qr" id="qr-en"></div>
+    </div>
+  </div>
+</div>
+<div class="bounce-gif" id="bounce-gif"></div>
+<div class="bounce-logo" id="bounce-logo"></div>
+<div class="bounce-kurczaki" id="bounce-kurczaki"></div>
+
+<div class="container">
+  <div class="orders" id="orders-grid"></div>
+</div>
+
+<div class="help-overlay" id="help-overlay">
+  <div class="title">STEROWANIE</div>
+  <table>
+    <tr><td>R</td><td>pokaż / ukryj wszystkie</td></tr>
+    <tr><td>1-3</td><td>pokaż / ukryj + wycisz (1=rick, 2=logo, 3=kurczaki)</td></tr>
+    <tr><td>4-6</td><td>tylko wycisz (4=rick, 5=logo, 6=kurczaki)</td></tr>
+    <tr><td>H</td><td>pokaż / ukryj licznik uderzeń</td></tr>
+    <tr><td>`</td><td>zamknij to okno</td></tr>
+  </table>
+</div>
+
+<script>
+let orders = [], lastStates = {}, lastSound = '', lastTime = 0;
+const CACHE_KEY = 'tablica_orders', CACHE_TTL = 2000;
+
+// Audio — pre-fetch jako blob
+const AUDIO_BLOBS = {};
+['chicken.mp3','chicken2.mp3','NoweZamowienie.mp3','Wrealizacji.mp3','Gotowe.mp3','anulowano.mp3']
+.forEach(f => fetch('/static/'+f).then(r=>r.blob()).then(b=>{AUDIO_BLOBS[f]=URL.createObjectURL(b)}).catch(()=>{}));
+
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  ctx.resume();
+}
+document.addEventListener('click', unlockAudio, {once:true});
+document.addEventListener('keydown', unlockAudio, {once:true});
+
+function playCached(url, vol, r1, r2) {
+  if (!audioUnlocked) return;
+  const key = url.replace('/static/','');
+  const src = AUDIO_BLOBS[key] || '/static/'+key;
+  const a = new Audio(src);
+  if (vol != null) a.volume = vol;
+  if (r1 != null && r2 != null) a.playbackRate = r1 + Math.random() * (r2 - r1);
+  a.play().catch(()=>{});
+}
+
+function loadOrders() {
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      if (Date.now() - c.ts < CACHE_TTL) { applyOrders(c.data); return }
+    } catch(e) {}
+  }
+  fetch('/api/orders?t=' + Date.now()).then(r => r.json()).then(data => {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ts: Date.now(), data}));
+    applyOrders(data);
+  }).catch(() => {});
+}
+
+function applyOrders(data) {
+  data.forEach(o => {
+    const key = o.id;
+    if (lastStates[key] && lastStates[key] !== o.status) playSound(o.status);
+    lastStates[key] = o.status;
+  });
+  const now = Date.now();
+  data.forEach(o => {
+    if (o.status === 'Gotowe' && o.timestamp) {
+      const t = new Date(o.timestamp).getTime();
+      if (now - t > 30*60*1000) fetch('/api/orders/'+o.id, {method:'DELETE'}).catch(()=>{});
+    }
+  });
+  orders = data.filter(o => o.status !== 'Gotowe' || !o.timestamp || now - new Date(o.timestamp).getTime() <= 30*60*1000);
+  render();
+}
+
+function render() {
+  const grid = document.getElementById('orders-grid');
+  const splash = document.getElementById('splash');
+  if (!orders.length) { grid.innerHTML = ''; splash.classList.remove('hidden'); return }
+  splash.classList.add('hidden');
+
+  const grp = {};
+  orders.forEach(o => {
+    const k = o.id;
+    if (!grp[k]) grp[k] = { status: o.status, items: [], time: o.timestamp, reason: o.reason || '' };
+    else if (o.reason) grp[k].reason = o.reason;
+    (o.items || [o]).forEach(item => {
+      grp[k].items.push({ name: item.name || item.item_name || '?', qty: item.quantity || 1, emoji: item.emoji || '🍽', portion: item.portion || '', extras: item.extras || [] });
+    });
+  });
+
+  const count = Object.values(grp).length;
+  const fs = Math.max(0.7, 1 - count * 0.008).toFixed(2);
+
+  grid.innerHTML = Object.values(grp).map(g => {
+    const sc = g.status === 'W realizacji' ? 'progress' : g.status === 'Zamówione' ? 'ordered' : g.status === 'Anulowane' ? 'cancelled' : g.status === 'Zwrócone' ? 'returned' : 'done';
+    const items = g.items.map(i => {
+      let s = '<span class="order-item-text">' + i.emoji + ' ' + i.name + (i.qty > 1 ? ' x' + i.qty : '');
+      if (i.portion && i.portion !== '1 porcja') s += ' (' + i.portion + ')';
+      s += '</span>';
+      return s;
+    }).join('');
+    const hasExtras = g.items.some(i => i.extras && i.extras.length);
+    const extrasHtml = hasExtras ? '<div class="order-extras">' + g.items.filter(i => i.extras && i.extras.length).map(i => i.extras.join(', ')).join(' · ') + '</div>' : '';
+    const reasonHtml = g.reason ? '<div class="order-reason">' + g.reason + '</div>' : '';
+    return '<div class="order" style="font-size:'+fs+'rem" data-time="'+(g.time||'')+'">' +
+      '<div>' +
+        '<div class="order-items">' + items + '</div>' +
+        extrasHtml +
+        reasonHtml +
+        '<div class="order-time"></div>' +
+      '</div>' +
+      '<div class="order-status ' + sc + '">' + g.status + '</div>' +
+    '</div>';
+  }).join(' ');
+  updateTimes();
+}
+
+function updateTimes() {
+  if (!orders.length) return;
+  const n = Date.now();
+  document.querySelectorAll('.order').forEach(el => {
+    const ts = el.getAttribute('data-time');
+    if (!ts) return;
+    const diff = n - new Date(ts).getTime();
+    const min = Math.floor(diff / 60000);
+    const timeEl = el.querySelector('.order-time');
+    if (min < 1) timeEl.textContent = 'przed chwilą';
+    else timeEl.textContent = min + ' min temu';
+    timeEl.className = 'order-time ' + (min > 30 ? 'old' : min > 15 ? 'warn' : 'fresh');
+  });
+}
+setInterval(updateTimes, 30000);
+
+function playSound(status) {
+  const n = Date.now();
+  if (status === lastSound && n - lastTime < 1000) return;
+  lastSound = status; lastTime = n;
+  const m = {'Zamówione':'NoweZamowienie.mp3','W realizacji':'Wrealizacji.mp3','Gotowe':'Gotowe.mp3','Anulowane':'anulowano.mp3'};
+  const f = m[status];
+  if (f) playCached('/static/'+f, 0.4, 0.85, 1.25);
+}
+
+let chickenToggle = false;
+function playChicken() {
+  chickenToggle = !chickenToggle;
+  playCached(chickenToggle ? '/static/chicken.mp3' : '/static/chicken2.mp3', 0.5, 0.9, 1.1);
+}
+
+function checkDzwonek() {
+  fetch('/api/dzwonek?t='+Date.now()).then(r=>r.json()).then(d=>{if(d.ring)playCached('/static/Gotowe.mp3',0.3,0.85,1.15)}).catch(()=>{});
+}
+
+setInterval(loadOrders, 3000);
+setInterval(checkDzwonek, 2000);
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadOrders();
+  
+  new QRCode(document.getElementById("qr-pl"), {
+    text: window.location.origin + '/zamow',
+    width: 150,
+    height: 150,
+    correctLevel : QRCode.CorrectLevel.M
+  });
+
+  new QRCode(document.getElementById("qr-en"), {
+    text: window.location.origin + '/zamow/en',
+    width: 150,
+    height: 150,
+    correctLevel : QRCode.CorrectLevel.M
+  });
+
+  // updateHud();
+  // fetch('/api/danie-dnia').then(r=>r.json()).then(d=>{ if(d.danie) document.getElementById('danie-dnia').textContent = 'Danie dnia: ' + d.danie }).catch(()=>{});
+});
+
+// function updateClock() {
+//   const d = new Date();
+//   document.getElementById('clock').textContent = d.toLocaleTimeString('pl-PL');
+// }
+// setInterval(updateClock, 1000);
+// updateClock();
+
+// function updateHud() {
+//   document.getElementById('hud').innerHTML = els.map(e => (e.label || e.el.className.split(' ')[0].replace('bounce-','')) + ': ' + e.hits + ' uderze' + (e.hits===1?'ń':'nia')).join('<br>') + '<br><span style="color:#7ecfd4">razem: ' + els.reduce((s,e)=>s+e.hits,0) + '</span>';
+// }
+
+const cols = ['#fbbf24','#4ade80','#60a5fa','#a78bfa','#f87171','#40d0b0','#f472b6'];
+function randomColor() { return cols[Math.floor(Math.random()*cols.length)] }
+
+const els = [
+  { el: document.getElementById('bounce-gif'),     baseW:110, baseH:85, w:110, h:85, x:100, y:100,  dx:3.0, dy:2.4,  hits:0, vis:true, key:'1', label:'rick' },
+  { el: document.getElementById('bounce-logo'),    baseW:180, baseH:99, w:180, h:99, x:300, y:200,  dx:-2.0,dy:2.8,  sound: null,          hits:0, vis:true, mute:false, key:'2' },
+  { el: document.getElementById('bounce-kurczaki'),baseW:120, baseH:72, w:120, h:72, x:200, y:400,  dx:-2.4,dy:-3.2, sound:'chicken',     hits:0, vis:true, mute:false, key:'3' },
+];
+let gifVisible = true, bounceId = null;
+let BASE_DX, BASE_DY, resScale = 1;
+
+function applyScale() {
+  resScale = Math.max(0.5, Math.min(2.5, Math.min(window.innerWidth/1920, window.innerHeight/1080)));
+  document.body.style.fontSize = (14 * resScale) + 'px';
+  els.forEach(e => {
+    e.w = Math.round(e.baseW * resScale);
+    e.h = Math.round(e.baseH * resScale);
+    e.el.style.width = e.w + 'px';
+    e.el.style.height = e.h + 'px';
+  });
+}
+applyScale();
+window.addEventListener('resize', applyScale);
+BASE_DX = els.map(e => e.dx); BASE_DY = els.map(e => e.dy);
+
+function bounceAll() {
+  if (!gifVisible) return;
+  els.forEach(e => {
+    if (!e.vis) return;
+    const mw = window.innerWidth - e.w, mh = window.innerHeight - e.h;
+    let bounced = false;
+    e.x += e.dx; e.y += e.dy;
+    if (e.x <= 0 || e.x >= mw) { e.dx = -e.dx; e.x = Math.max(0, Math.min(e.x, mw)); bounced = true }
+    if (e.y <= 0 || e.y >= mh) { e.dy = -e.dy; e.y = Math.max(0, Math.min(e.y, mh)); bounced = true }
+    e.el.style.left = e.x + 'px'; e.el.style.top = e.y + 'px';
+    if (bounced) {
+      e.hits++;
+      // updateHud();
+      if (!e.mute && e.sound === 'chicken') playChicken();
+    }
+  });
+  bounceId = requestAnimationFrame(bounceAll);
+}
+
+document.getElementById('help-overlay').addEventListener('click', function() { this.classList.remove('on') });
+
+document.addEventListener('keydown', e => {
+  const k = e.key;
+  if (k === 'r' || k === 'R') {
+    gifVisible = !gifVisible;
+    els.forEach(o => o.el.style.display = gifVisible ? 'block' : 'none');
+    if (gifVisible) bounceId = requestAnimationFrame(bounceAll);
+    else cancelAnimationFrame(bounceId);
+  }
+  if (k === '`') {
+    e.preventDefault();
+    document.getElementById('help-overlay').classList.toggle('on');
+  }
+  if (k === 'h' || k === 'H') {
+    document.getElementById('hud').classList.toggle('hidden');
+  }
+  const n = parseInt(k);
+  if (n >= 1 && n <= 3) {
+    const e = els[n-1];
+    e.vis = !e.vis;
+    e.el.style.display = e.vis ? 'block' : 'none';
+  }
+  const muteKeys = {'4':0,'5':1,'6':2};
+  if (k in muteKeys) {
+    const e = els[muteKeys[k]];
+    e.mute = !e.mute;
+  }
+});
+bounceAll();
+</script>
+</body>
+</html>
