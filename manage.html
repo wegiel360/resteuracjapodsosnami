@@ -297,7 +297,6 @@
 
     function renderMenuList() {
         const list = document.getElementById('menu-list');
-        document.getElementById('menu-count').textContent = menuItems.length;
         if (menuItems.length === 0) return list.innerHTML = '<div class="list-empty" style="padding:16px; text-align:center; color:#5a8a94;">Brak pozycji w menu</div>';
 
         list.innerHTML = menuItems.map(item => `
